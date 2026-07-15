@@ -781,6 +781,20 @@ function parseHash() {
     state.railFilter = e.target.value;
     renderRail();
   });
+  const setRailCollapsed = (collapsed) => {
+    document.getElementById('app').classList.toggle('rail-collapsed', collapsed);
+    el('btn-expand').hidden = !collapsed;
+    try { localStorage.setItem('ds-rail-collapsed', collapsed ? '1' : ''); } catch { /* private mode */ }
+  };
+  el('btn-collapse').onclick = () => setRailCollapsed(true);
+  el('btn-expand').onclick = () => setRailCollapsed(false);
+  try { if (localStorage.getItem('ds-rail-collapsed') === '1') setRailCollapsed(true); } catch { /* private mode */ }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '[' && !isTyping()) {
+      setRailCollapsed(!document.getElementById('app').classList.contains('rail-collapsed'));
+    }
+  });
+
   el('btn-request').onclick = (e) => { e.stopPropagation(); toggleRequestPopover(); };
   el('pr-chip').onclick = (e) => { e.stopPropagation(); togglePrPanel(); };
   document.addEventListener('click', (e) => {

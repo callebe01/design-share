@@ -65,7 +65,23 @@ button { font: inherit; cursor: pointer; }
   background: #fff;
 }
 
-.repo-name { font-size: 13.5px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.repo-name { font-size: 13.5px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-3);
+  flex: none;
+}
+.icon-btn:hover { color: var(--text); background: #f2f2f4; }
+
+#app.rail-collapsed #rail { display: none; }
 
 .rail-filter {
   display: flex;
