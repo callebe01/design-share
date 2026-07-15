@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { tryGit } from './git.js';
 import { currentBranch } from './detect.js';
 import { serveStatic } from './previews.js';
-import { listOpenPRs } from './github.js';
+import { listOpenPRs, prDetail } from './github.js';
 
 const PUBLIC_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'public');
 const SYNC_INTERVAL_MS = 15_000;
@@ -109,6 +109,19 @@ export class DesignShareServer {
       if (p.startsWith('/api/')) {
         if (req.method === 'GET' && p === '/api/board') {
           return json(res, 200, await this.board());
+        }
+        if (req.method === 'GET' && p === '/api/pr') {
+          const branch = url.searchParams.get('branch') || '';
+          const pr = this.prs[branch];
+          if (!pr) return json(res, 200, { pr: null });
+          this._prDetailCache = this._prDetailCache || new Map();
+          const cached = this._prDetailCache.get(pr.number);
+          if (cached && Date.now() - cached.at < 120_000) {
+            return json(res, 200, { pr: cached.data });
+          }
+          const data = await prDetail(this.repo.root, pr.number);
+          if (data) this._prDetailCache.set(pr.number, { at: Date.now(), data });
+          return json(res, 200, { pr: data });
         }
         if (req.method === 'POST' && p === '/api/share') {
           const body = await readBody(req);

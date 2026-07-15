@@ -10,6 +10,62 @@ const icons = {
   eye: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>',
 };
 
+/* ---------- PR panel (read only) ---------- */
+
+function renderPrChip() {
+  const chip = el('pr-chip');
+  const sel = state.selected;
+  const pr = sel && state.board.prs ? state.board.prs[sel.branch] : null;
+  chip.hidden = !pr;
+  if (pr) {
+    const open = !el('pr-panel').hidden;
+    chip.innerHTML = `PR #${pr.number} <span class="chev">${open ? '▴' : '▾'}</span>`;
+    chip.title = pr.title || '';
+  } else {
+    el('pr-panel').hidden = true;
+  }
+}
+
+async function togglePrPanel(force) {
+  const panel = el('pr-panel');
+  const show = force !== undefined ? force : panel.hidden;
+  if (!show) { panel.hidden = true; renderPrChip(); return; }
+  const sel = state.selected;
+  if (!sel) return;
+  panel.innerHTML = '<div class="pr-loading"><div class="spinner"></div></div>';
+  panel.hidden = false;
+  renderPrChip();
+  const r = await fetch(`/api/pr?branch=${encodeURIComponent(sel.branch)}`).then((x) => x.json());
+  if (panel.hidden) return; // closed while loading
+  if (!r.pr) {
+    panel.innerHTML = '<div class="pr-loading">Could not load the PR right now.</div>';
+    return;
+  }
+  const pr = r.pr;
+  const stateCls = pr.state === 'OPEN' ? 'live' : pr.state === 'MERGED' ? 'merged' : 'closed';
+  panel.innerHTML = `
+    <div class="pr-head">
+      <span class="dot ${stateCls}"></span>
+      <span class="pr-title">${escapeHtml(pr.title)}</span>
+      <span class="pr-num">#${pr.number}</span>
+      <a class="pr-open" href="${escapeHtml(pr.url)}" target="_blank" rel="noopener">Open on GitHub</a>
+    </div>
+    <div class="pr-byline">${escapeHtml(pr.author)} · ${escapeHtml(pr.state.toLowerCase())} · ${timeAgo(Date.parse(pr.createdAt) / 1000)}</div>
+    ${pr.body ? `<div class="pr-body">${escapeHtml(pr.body)}</div>` : '<div class="pr-body dim-note">No description.</div>'}
+    ${pr.comments.length ? `
+      <div class="pr-comments-label">Comments (${pr.comments.length})</div>
+      ${pr.comments.map((c) => `
+        <div class="pr-comment">
+          <div class="pr-comment-head">
+            <span class="avatar">${escapeHtml((c.author || '?').slice(0, 1))}</span>
+            <b>${escapeHtml(c.author)}</b>
+            <span class="pr-comment-time">${timeAgo(Date.parse(c.createdAt) / 1000)}</span>
+          </div>
+          <div class="pr-comment-body">${escapeHtml(c.body)}</div>
+        </div>`).join('')}` : '<div class="dim-note" style="margin-top:8px">No comments on the PR yet.</div>'}
+  `;
+}
+
 /* ---------- review requests ---------- */
 
 function branchRequests(branch) {
@@ -271,6 +327,7 @@ function branchRow({ user, branch, time, dim, own }) {
 
 async function select(user, branch) {
   state.selected = { user, branch };
+  el('pr-panel').hidden = true;
   state.commentMode = false;
   state.pendingPin = null;
   state.focusedComment = null;
@@ -358,6 +415,7 @@ function renderStage() {
   }
 
   renderRequestButton();
+  renderPrChip();
 
   const cm = el('btn-comment-mode');
   cm.innerHTML = `${icons.message} <span>${state.commentMode ? 'Click an element to pin' : 'Comment'}</span>`;
@@ -668,6 +726,7 @@ el('btn-retry').onclick = () => pollPreview();
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (!el('composer').hidden) closeComposer();
+    else if (!el('pr-panel').hidden) togglePrPanel(false);
     else if (state.commentMode) { state.commentMode = false; renderStage(); }
     else if (state.focusedComment) {
       state.focusedComment = null;
@@ -723,8 +782,10 @@ function parseHash() {
     renderRail();
   });
   el('btn-request').onclick = (e) => { e.stopPropagation(); toggleRequestPopover(); };
+  el('pr-chip').onclick = (e) => { e.stopPropagation(); togglePrPanel(); };
   document.addEventListener('click', (e) => {
     if (!el('request-popover').hidden && !e.target.closest('.request-wrap')) toggleRequestPopover(false);
+    if (!el('pr-panel').hidden && !e.target.closest('#pr-panel') && !e.target.closest('#pr-chip')) togglePrPanel(false);
   });
   renderViewportSeg();
   await refresh();

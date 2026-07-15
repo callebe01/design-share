@@ -4,6 +4,12 @@
   "description": "Live branch previews and pinned comments for design teams. Zero config, no server, git is the backend.",
   "keywords": ["design", "preview", "branches", "collaboration", "cli"],
   "license": "MIT",
+  "funding": "https://buymeacoffee.com/callebe",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/callebe01/design-share.git"
+  },
+  "homepage": "https://github.com/callebe01/design-share#readme",
   "type": "module",
   "bin": {
     "design-share": "bin/design-share.js"

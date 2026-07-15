@@ -62,3 +62,7 @@ Quitting with Ctrl+C in the terminal is respected as a deliberate stop. Closing 
 ## Requirements
 
 Node 18 or newer, git, and a repo with an origin remote (solo local mode works without one).
+
+---
+
+Built by [Callebe](https://github.com/callebe01). If design-share saves your team some friction, you can [buy me a coffee](https://buymeacoffee.com/callebe).
