@@ -1,6 +1,6 @@
 {
   "name": "design-share",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Live branch previews and pinned comments for design teams. Zero config, no server, git is the backend.",
   "keywords": ["design", "preview", "branches", "collaboration", "cli"],
   "license": "MIT",
