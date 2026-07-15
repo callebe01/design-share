@@ -1,0 +1,9 @@
+/projects
+/to-do
+node_modules
+.DS_Store
+dist
+.design-share.json
+*.cer
+*.key
+*.p12

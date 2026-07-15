@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>design-share</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app">
+  <aside id="rail">
+    <div class="rail-head">
+      <span class="logo-mark"></span>
+      <span id="repo-name" class="repo-name">…</span>
+    </div>
+    <div class="rail-filter">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="branch-filter" placeholder="Filter people or branches" spellcheck="false" autocomplete="off">
+    </div>
+    <div id="rail-sections"></div>
+    <div class="rail-foot">
+      <div id="sync-status" class="sync-status"></div>
+    </div>
+  </aside>
+
+  <main id="stage">
+    <header id="stage-head">
+      <div class="stage-title-wrap">
+        <span id="stage-title" class="stage-title">pick a branch</span>
+        <span id="stage-meta" class="stage-meta"></span>
+      </div>
+      <div class="stage-actions">
+        <div class="seg" id="viewport-seg"></div>
+        <div class="request-wrap">
+          <button class="btn ghost" id="btn-request"></button>
+          <div id="request-popover" hidden></div>
+        </div>
+        <button class="btn" id="btn-comment-mode"></button>
+      </div>
+    </header>
+    <div id="frame-area">
+      <div id="frame-wrap">
+        <div id="frame-empty" class="frame-state">
+          <div class="frame-state-title">No branch selected</div>
+          <div class="frame-state-sub">Pick a branch from the left rail to open its live preview.</div>
+        </div>
+        <div id="frame-loading" class="frame-state" hidden>
+          <div class="spinner"></div>
+          <div class="frame-state-title" id="loading-title">Starting preview</div>
+          <div class="frame-state-sub" id="loading-sub">Checking out the branch and booting its dev server.</div>
+          <pre id="loading-log" class="log-tail"></pre>
+        </div>
+        <div id="frame-error" class="frame-state" hidden>
+          <div class="frame-state-title err">Preview could not start</div>
+          <div class="frame-state-sub" id="error-sub"></div>
+          <pre id="error-log" class="log-tail"></pre>
+          <button class="btn" id="btn-retry">Try again</button>
+        </div>
+        <iframe id="frame" title="branch preview" hidden></iframe>
+        <div id="pin-layer"></div>
+        <div id="composer" hidden>
+          <textarea id="composer-text" rows="2" placeholder="Leave a note for the author…"></textarea>
+          <div class="composer-actions">
+            <button class="btn small" id="composer-post">Post</button>
+            <span class="kbd-hint">⌘↵</span>
+            <button class="btn ghost small" id="composer-cancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <aside id="comments-panel">
+    <div class="panel-head">
+      <span>Comments</span>
+      <span id="comments-count" class="count"></span>
+    </div>
+    <div id="comments-list"></div>
+  </aside>
+</div>
+<script src="/app.js"></script>
+</body>
+</html>
